@@ -1,0 +1,164 @@
+#############################################################
+#####             JOB DESCRIPTION                       #####
+#############################################################
+
+# Production run of a complex of RRM with RNA (PDB ID: 2RS2)
+
+#############################################################
+#####            ADJUSTABLE PARAMETERS                  #####
+#############################################################
+
+# specify the temperature here 
+set temperature    310.0
+set name           5X3Z
+set outputname     04_${name}_prod
+set prev_dir       ../03_equil_NPT/    ;# "./" for same directory
+
+#specify the location of the psf and pdb files
+parmfile           ../common/${name}_ion.prmtop
+coordinates        ${prev_dir}03_${name}_equil_NPT.coor
+bincoordinates     ${prev_dir}03_${name}_equil_NPT.restart.coor
+extendedsystem     ${prev_dir}03_${name}_equil_NPT.xsc
+
+# in case you are restarting a run, put restart =1, otherwise we set restart =0
+set restart	   0
+
+# this loop won't run, as our restart variable is set to 0
+# Continuing a job from the restart files
+if {$restart} {
+set inputname      $outputname
+Coordinates        ../$inputname.restart.coor
+Velocities         ../$inputname.restart.vel  ;# remove the "temperature" entry if you use this!
+extendedSystem	   ../$inputname.restart.xsc
+} 
+
+# firsttimestep is a command, not a variable, so we don't use 'set' here
+#firsttimestep      0
+
+
+#############################################################
+######          SIMULATION PARAMETERS                  ######
+#############################################################
+
+# Input
+
+# specify the parameter files location
+#paraTypeCharmm	    off
+#parameters          ../common/final.params
+# this loop won't work
+if {$restart-1} {
+temperature	    $temperature
+}
+
+# Force-Field Parameters  (for amber ff ) 
+amber               yes
+exclude             scaled1-4
+1-4scaling          0.833333 
+switching           off
+
+# dealing with long-range interactions
+# switchdist          10.5    ;# switching is off while using amber ff
+cutoff              9.0       ;# beyond cutoff electrostatics interactions aren't calculated;
+pairlistdist        11.0
+stepspercycle       20
+splitpatch          hydrogen
+hgroupcutoff        2.8
+
+# switchdist and pairlistdist keep a track on the atoms moved
+# they basically control that the atom doesn't move arbitrarily far in one step
+# stepspercycle is the number of cycles after which namd will update the pairlistdist  
+
+
+# Integrator Parameters
+timestep            1.0
+rigidBonds          water
+rigidTolerance      1.0e-8
+rigiditerations     100
+nonbondedFreq       1
+#vdwGeometricSigma   yes
+fullElectFrequency  2  
+pairlistsperCycle   2
+
+if {0} {
+# Periodic Boundary Conditions
+cellBasisVector1     84.1184799   0.0   0.0
+cellBasisVector2     -28.039493299999997    79.30766341385906   0.0 
+cellBasisVector3     -28.039493299999997    -39.65383170692953   -68.68245123118763
+cellOrigin           41.98321507871151   41.99419403076172   42.14655303955078
+}
+
+# PME (for full-system periodic electrostatics)
+PME                 on
+PMEGridSpacing      1.0
+PMETolerance        10e-6
+PMEInterpOrder      4
+
+#manual grid definition
+#PMEGridSizeX        45
+#PMEGridSizeY        45
+#PMEGridSizeZ        100
+
+wrapAll             on
+wrapNearest         on
+
+# Constant Temperature Control
+if {1} {
+langevin            on    ;# do langevin dynamics
+langevinDamping     1     ;# damping coefficient (gamma) of 1/ps
+langevinTemp        $temperature
+langevinHydrogen    off    ;# don't couple langevin bath to hydrogens
+}
+
+# Constant Pressure Control (variable volume)
+if {1} {
+useGroupPressure      yes ;# needed for rigidBonds
+useFlexibleCell       no
+useConstantArea       no
+
+langevinPiston        on
+langevinPistonTarget  1.01325 ;#  in bar -> 1 atm
+langevinPistonPeriod  100.0
+langevinPistonDecay   50.0
+langevinPistonTemp    $temperature
+}
+
+# Fixed Atoms Constraint (set PDB beta-column to 1)
+if {0} {
+fixedAtoms          on
+fixedAtomsForces    on #Is it necessary?
+fixedAtomsFile      myfixedatoms.pdb
+fixedAtomsCol       B
+}
+
+# IMD Settings (can view sim in VMD)
+if {0} {
+IMDon           on
+IMDport         3000    ;# port number (enter it in VMD)
+IMDfreq         1       ;# send every 1 frame
+IMDwait         no      ;# wait for VMD to connect before running?
+}
+
+# Output
+outputName          $outputname
+restartfreq         10000
+restartname         $outputname.restart
+dcdfreq             10000
+# dcdfile             04_${name}_prod.dcd
+outputEnergies      10000
+outputPressure      10000
+outputtiming        10000
+binaryoutput        no
+binaryrestart	    yes
+
+#############################################################
+######            EXTRA PARAMETERS                     ######
+#############################################################
+watermodel          tip3
+CUDASOAintegrate     on
+
+#############################################################
+######            EXECUTION SCRIPT                      #####
+#############################################################
+
+# Production run
+numsteps             100000000 

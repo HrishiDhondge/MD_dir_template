@@ -1,0 +1,169 @@
+#############################################################
+#####            JOB DESCRIPTION                        #####
+#############################################################
+
+# Minimization of a complex of RRM with RNA (PDB ID: 2RS2)
+
+#############################################################
+#####          ADJUSTABLE PARAMETERS                    #####
+#############################################################
+
+# specify the temperature here 
+set temperature    310.0
+set name           5X3Z
+set outputname     01_${name}_min
+
+#specify the location of the psf and pdb files
+parmfile         ../common/${name}_ion.prmtop
+ambercoor        ../common/${name}_ion.inpcrd
+
+# in case you are restarting a run, put restart =1, otherwise we set restart =0
+set restart	   0
+
+# this loop won't run, as our restart variable is set to 0
+# Continuing a job from the restart files
+if {$restart} {
+set inputname      $outputname
+Coordinates        ../$inputname.restart.coor
+Velocities         ../$inputname.restart.vel  ;# remove the "temperature" entry if you use this!
+extendedSystem	   ../$inputname.restart.xsc
+} 
+
+# firsttimestep is a command, not a variable, so we don't use 'set' here
+firsttimestep      0
+
+
+#############################################################
+###########    SIMULATION PARAMETERS            #############
+#############################################################
+
+# Input
+
+# specify the parameter files location
+#paraTypeCharmm	    off
+#parameters          ../common/final.params
+# this loop won't work
+if {$restart-1} {
+temperature	    $temperature
+}
+
+# Force-Field Parameters  (for amber ff ) 
+amber               yes
+exclude             scaled1-4
+1-4scaling          0.833333 
+switching           off
+
+# dealing with long-range interactions
+# switchdist         10.5     ;# switching is off while using amber ff
+cutoff              9.0       ;# beyond cutoff electrostatics interactions aren't calculated;
+pairlistdist        11.0
+stepspercycle       20        ;# stepspercycle is the number of cycles after which namd will update the pairlistdist
+splitpatch          hydrogen
+hgroupcutoff        2.8
+
+# switchdist and pairlistdist keep a track on the atoms moved
+# they basically control that the atom doesn't move arbitrarily far in one step
+
+# Integrator Parameters
+timestep            1.0
+rigidBonds          water
+rigidTolerance      1.0e-8
+rigiditerations     100
+nonbondedFreq       1
+#vdwGeometricSigma   yes
+fullElectFrequency  2  
+pairlistsperCycle   2
+
+# Periodic Boundary Conditions
+cellBasisVector1     110.1038974   0.0   0.0
+cellBasisVector2     -36.70129913333333  103.80694998214383   0.0 
+cellBasisVector3     -36.70129913333333  -51.90347499107192   -89.89945577391713
+cellOrigin           55.13871765136719   55.185523986816406   55.0492057800293
+
+# PME (for full-system periodic electrostatics)
+PME                  on
+PMEGridSpacing       1.0
+PMETolerance         10e-6
+PMEInterpOrder       4
+
+#manual grid definition
+#PMEGridSizeX        45
+#PMEGridSizeY        45
+#PMEGridSizeZ        100
+
+wrapAll              on
+wrapNearest          on
+
+# Constant Temperature Control
+if {0} {
+langevin            on    ;# do langevin dynamics
+langevinDamping     1     ;# damping coefficient (gamma) of 1/ps
+langevinTemp        $temperature
+langevinHydrogen    off    ;# don't couple langevin bath to hydrogens
+}
+
+# Constant Pressure Control (variable volume)
+if {0} {
+useGroupPressure      yes ;# needed for rigidBonds
+useFlexibleCell       no
+useConstantArea       no
+
+langevinPiston        on
+langevinPistonTarget  1.01325 ;#  in bar -> 1 atm
+langevinPistonPeriod  100.0
+langevinPistonDecay   50.0
+langevinPistonTemp    $temperature
+}
+
+# Fixed Atoms Constraint (set PDB beta-column to 1)
+if {0} {
+fixedAtoms          on
+fixedAtomsForces    on #Is it necessary?
+fixedAtomsFile      myfixedatoms.pdb
+fixedAtomsCol       B
+}
+
+# IMD Settings (can view sim in VMD)
+if {0} {
+IMDon               on
+IMDport             3000    ;# port number (enter it in VMD)
+IMDfreq             1       ;# send every 1 frame
+IMDwait             no      ;# wait for VMD to connect before running?
+}
+
+# Output
+# all output files will have the same name but different extensions
+# our outputname is 01_XXXX_min, so
+# 01_XXXX_min.dcd 01_XXXX_min.coor etc files will be created
+# 1 step = 2 fs
+# 500 step = 1000 fs = 1 ps
+# remember : 1 step = 2 fs; 1000fs = 1ps and 1000ps = 1ns
+# remember : 1ns = 1000ps and 1ps = 1000fs
+# MD Simulations are run for 40-60 ns range
+# so steps = 40*1000*1000/2 = (time/2)*10^6 steps
+outputName          $outputname
+restartfreq         10000
+restartname         $outputname.restart
+dcdfreq             1000
+# dcdfile             01_${name}_minimization.dcd
+outputEnergies      1000
+outputPressure      1000
+outputtiming        1000
+binaryoutput	    no
+binaryrestart	    yes
+
+#############################################################
+########          EXTRA PARAMETERS                     ######
+#############################################################
+watermodel          tip3      ;# tip3 is default
+#CUDASOAintegrate          on  ;# For minimization don't use this parameter
+
+#############################################################
+########           EXECUTION SCRIPT                    ######
+#############################################################
+
+# Minimization
+mintinystep          1.0e-6
+minbabystep          1.0e-4
+minLineGoal          1.0e-4
+minimize             200000

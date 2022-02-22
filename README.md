@@ -35,7 +35,7 @@ exit
 
 4. Prepare topology and coordinate files
 - Run pdb4amber for each separated chains.
-`pdb4amber -i PDB_PROCESSED.pdb -o PDB_AMBER.pdb -y -d -l pdb4amber.log --leap-template`
+`pdb4amber -i PDB_PROCESSED.pdb -o PDB_AMBER.pdb -d -l pdb4amber.log --leap-template`
 
 - Start tleap to prepare topology, coordinates
 	Source/load all force fields
@@ -67,7 +67,7 @@ exit
 	- `saveamberparm complex PDB_solv.prmtop PDB_solv.inpcrd`
 
 - Ionize the system (http://ambermd.org/tutorials/basic/tutorial8/index.php)
-	- addIonsRand complex Na+ 27 Cl- 27
+	- `addIonsRand complex Na+ 27 Cl- 27`
 
 - Write topology and coordinate files 
 	- `saveamberparm complex PDB_ion.prmtop PDB_ion.inpcrd`
