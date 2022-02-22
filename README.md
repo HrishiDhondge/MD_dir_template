@@ -3,8 +3,9 @@ Templates for amber force field in NAMD
 
 ## Preparing the system
 1. Get PDB file
-- From RCSB PDB (https://files.rcsb.org/download/2RS2.pdb)
+- From RCSB PDB 
 	- Biological assembly is same as of first model.*
+	- `wget https://files.rcsb.org/download/2RS2.pdb`
 - Lookout for any non-standard residues used (like MSE)
 
 2. Pre-processing of PDB file
@@ -13,8 +14,11 @@ Templates for amber force field in NAMD
 
 - Separate the most average model (Use ./scripts/separate_models.awk )
 - Check the sequence from structure with actual protein sequence
+	- Download fasta sequence for the PDB file `wget https://www.rcsb.org/fasta/entry/2RS2/download -O 2RS2.fasta`
+	- Split the downloaded PDB sequence into different chains `grep -A1 "Chain A" 2RS2.fasta > 2RS2_chain_A.fasta`
+
 - PDBFixer to add any missing atoms 
-	(pdbfixer MODEL.pdb --output=PDB_PROCESSED.pdb --add-residues --add-atoms=heavy --verbose)
+	`pdbfixer MODEL.pdb --output=PDB_PROCESSED.pdb --add-residues --add-atoms=heavy --verbose`
 - Modeller (only if required)
 
 3. Separate chains (if any)
