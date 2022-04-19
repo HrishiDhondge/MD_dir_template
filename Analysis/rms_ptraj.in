@@ -1,0 +1,11 @@
+parm 5X3Z_ion.prmtop
+trajin all_traj_unwrap.dcd
+rms fit :2-75
+atomicfluct out model_ca_bfactor.rmsf @CA byatom bfactor
+atomicfluct out model_resid.rmsf byres
+rmsd :10-70 first perres perrescenter perresout nt_all.rmsd range 82-86
+rmsd :1-86 first out complex_prot.rmsd nofit
+rmsd :82-86 first out nucleic_prot.rmsd nofit
+rmsd :1-81 first out protein_prot.rmsd nofit
+rmsd :82-86 first out nucleic_nucleic.rmsd 
+run

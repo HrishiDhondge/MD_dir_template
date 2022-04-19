@@ -1,0 +1,8 @@
+parm 5X3Z_ion.prmtop
+trajin all_traj_unwrap.dcd
+autoimage
+strip :WAT,Na+,Cl-
+strip @H*
+rms fit :2-75
+trajout all_traj_stripped.nc
+run

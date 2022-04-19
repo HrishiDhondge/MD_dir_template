@@ -1,0 +1,9 @@
+parm 5X3Z_ion.prmtop
+trajin all_traj_unwrap.dcd
+trajout all_traj_stripped.nc
+trajout 01_min_strip.nc onlyframes 1-500
+trajout 02_heat_eq_310_strip.nc onlyframes 501-8779
+trajout 03_heat_eq_350_strip.nc onlyframes 8780-18815
+trajout 04_heat_eq_400_strip.nc onlyframes 18816-28860
+trajout 05_heat_eq_450_strip.nc onlyframes 28861-38905
+run

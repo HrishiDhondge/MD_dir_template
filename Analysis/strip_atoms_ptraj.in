@@ -1,0 +1,6 @@
+parm 5X3Z_ion.prmtop
+trajin all_traj_unwrap.dcd
+strip :1-5
+strip :85@CD1,85@N2
+trajout all_traj_stripped.nc
+run

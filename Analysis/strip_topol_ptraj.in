@@ -1,0 +1,5 @@
+parm 5X3Z_ion.prmtop
+parmstrip :WAT,Na+,Cl-
+parmstrip @H*
+parmwrite out topology_stripped.prmtop
+run
