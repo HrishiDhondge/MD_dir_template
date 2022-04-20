@@ -1,0 +1,4 @@
+parm topology_stripped.prmtop
+parmstrip :77-84
+parmwrite out topology_stripped_flex.prmtop
+run
