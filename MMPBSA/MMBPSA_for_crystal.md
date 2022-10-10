@@ -8,10 +8,16 @@ To run MMPBSA we need following files:
 4. Topology of solvated complex 
 5. The trajectory file
 
-For cluster -->
+For cluster -->  
+
 ```
 module load singularity
-singularity run --nv --bind /data1/hdhondge/MMPBSA_crystal,/data1/isaure/software/amber16/bin/amber.python:/MMPBSA/,/data1/isaure/software/amber16/bin/amber.python /softs/singimg/amber16_cuda
+singularity run --nv --bind /data1/hdhondge/MMPBSA_crystal:/MMPBSA/  /softs/singimg/amber16_cuda
+```
+where `/data1/hdhondge/MMPBSA_crystal/` is the directory with `Protein-aa.pdb` and `RNA-aa.pdb`.  
+Change the directory in Singularity 
+```
+cd /MMPBSA/
 ```
 
 We will create all the topology files using `tleap` program from AMBER.
