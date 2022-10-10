@@ -52,9 +52,20 @@ saveamberparm prot protein.parm7 protein.rst7
 saveamberparm rna rna.parm7 rna.rst7
 ```
 
-Create the complex and save topology.
+Create the complex and check the charge of complex
 ```
 complex = combine {prot, rna}
+charge complex
+```
+Neutralize the complex if needed (in case charge is non-zero)
+```
+addIons complex Na+ NUMBER
+```
+OR `addIons complex Cl- NUMBER` based on if charge is negative or positive.  
+
+
+Save the topology for complex
+```
 saveamberparm complex complex.parm7 complex.rst7
 ```
 
