@@ -98,7 +98,7 @@ Per-residue GB and PB decomposition
   igb=5, saltcon=0.150,
 /
 &pb
-  istrng=150,
+  istrng=150, radiopt=0,
 /
 &decomp
   idecomp=1, print_res="290-295"
